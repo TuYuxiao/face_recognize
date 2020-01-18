@@ -1,7 +1,7 @@
 from .asvloffscreen import ASVL_PAF_RGB24_B8G8R8
 from .arcsoft_face_sdk import *
 from .merror import MOK, MERR_ASF_ALREADY_ACTIVATED
-from face_recognize.common import FaceInfo, MRECT
+from face_recognize.common import FaceInfo
 from ctypes import *
 
 import platform
