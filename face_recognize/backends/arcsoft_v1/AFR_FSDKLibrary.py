@@ -2,7 +2,8 @@
 import platform
 import os
 from ctypes import *
-from face_recognize.common import FaceFeature, MRECT, ASVLOFFSCREEN
+from . import ASVLOFFSCREEN, MRECT
+from face_recognize.common import ArcsoftFaceFeature
 
 class AFR_FSDK_Version(Structure):
     _fields_ = [('lCodebase',c_int32),('lMajor',c_int32),('lMinor',c_int32),('lBuild',c_int32),('lFeatureLevel',c_int32),
@@ -15,18 +16,28 @@ class AFR_FSDK_FACEINPUT(Structure):
         #self.faceRect = self.rcFace
         #self.faceOrient = lOrient
 
-class AFR_FSDK_FACEMODEL(FaceFeature):
+class AFR_FSDK_FACEMODEL(ArcsoftFaceFeature):
     _fields_ = [('pbFeature',c_void_p),('lFeatureSize',c_int32)]
-    def __init__(self):
-        FaceFeature.__init__(self)
-    def getFeature(self):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    @property
+    def _feature(self):
         return self.pbFeature
-    def setFeature(self, feature):
+
+    @_feature.setter
+    def _feature(self, feature):
         self.pbFeature = feature
-    def getFeatureSize(self):
+
+    @property
+    def feature_size(self):
         return self.lFeatureSize
-    def setFeatureSize(self, featureSize):
-        self.lFeatureSize = featureSize
+
+    @feature_size.setter
+    def feature_size(self, feature_size):
+        self.lFeatureSize = feature_size
+
 
 if platform.system() == 'Windows':
     internalLibrary = CDLL(os.path.join(os.path.dirname(

@@ -2,8 +2,13 @@ import dlib
 import face_recognition_models
 import numpy as np
 from face_recognize.common import FaceInfo
+from . import DlibFaceFeature
 
-threshold = 0.4
+THRESHOLD = 0.4
+TRACK_ACCELERATE = False
+TRACK_ID = False
+
+FaceFeature = DlibFaceFeature
 
 
 def to_rect(face_info):
@@ -27,7 +32,7 @@ def init_engine(mode='image', num_face=10, mask='all'):
         #return cnn_face_detector
 
 
-def detect(engine, img, mode='image',number_of_times_to_upsample=1):
+def detect(engine, img, number_of_times_to_upsample=1):
     img = img[..., ::-1]
     locations = engine(img,number_of_times_to_upsample)
     face_infos = []
@@ -40,14 +45,18 @@ def detect(engine, img, mode='image',number_of_times_to_upsample=1):
     return face_infos
 
 
+def track(engine, img, number_of_times_to_upsample=1):
+    return detect(engine, img, number_of_times_to_upsample)
+
+
 def extract(engine, img, face_info, *, num_jitters=1):
     pose_predictor, face_encoder = engine
 
     img = img[..., ::-1]
     landmark = pose_predictor(img, to_rect(face_info))
 
-    return np.array(face_encoder.compute_face_descriptor(img, landmark, num_jitters))
+    return DlibFaceFeature(np.array(face_encoder.compute_face_descriptor(img, landmark, num_jitters)))
 
 
 def compare(engine, feature1, feature2):
-    return 1. - np.linalg.norm(feature1 - feature2)
+    return 1. - np.linalg.norm(feature1.feature - feature2.feature)

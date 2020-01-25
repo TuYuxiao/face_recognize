@@ -6,6 +6,12 @@ from ctypes import *
 
 import platform
 
+THRESHOLD = 0.8
+TRACK_ACCELERATE = True
+TRACK_ID = True
+
+FaceFeature = ASF_FaceFeature
+
 APPID = b"AANTqgLuerZzjWdvtAJyx8p589erGMQX5x39C1urYbne"
 if platform.system() == 'Windows':
     SDKKEY = b"Co5UzVAgjkQD3skZwEQHxRRjCXv1krzBBo3RxL3ha351"
@@ -44,7 +50,7 @@ def init_engine(mode='image', num_face=10, mask='all'):
         return handle
 
 
-def detect(engine, img, mode='image'):
+def detect(engine, img):
     assert img.shape[1] % 4 == 0
     assert img.shape[0] % 2 == 0
     face_info = ASF_MultiFaceInfo()
@@ -54,17 +60,36 @@ def detect(engine, img, mode='image'):
 
     if res != MOK:
         print("ASFDetectFaces fail: %d" % res)
-        return None
+        return []
 
     face_infos = []
     for i in range(face_info.faceNum):
-        face_id = None if mode == 'image' else face_info.faceID[i]
+        rect = face_info.faceRect[i]
+        face_infos.append(FaceInfo(face_info.faceOrient[i], max(rect.left, 0),
+                                   max(rect.top, 0), min(rect.right, img.shape[1]),
+                                   min(rect.bottom, img.shape[0])))
+    return face_infos
+
+
+def track(engine, img):
+    assert img.shape[1] % 4 == 0
+    assert img.shape[0] % 2 == 0
+    face_info = ASF_MultiFaceInfo()
+    res = ASFDetectFaces(engine, img.shape[1], img.shape[0], ASVL_PAF_RGB24_B8G8R8,
+                         img.ctypes.data_as(POINTER(c_ubyte)),
+                         byref(face_info))
+
+    if res != MOK:
+        print("ASFDetectFaces fail: %d" % res)
+        return []
+
+    face_infos = []
+    for i in range(face_info.faceNum):
+        face_id = face_info.faceID[i]
         rect = face_info.faceRect[i]
         face_infos.append(FaceInfo(face_info.faceOrient[i], max(rect.left, 0),
                                    max(rect.top, 0), min(rect.right, img.shape[1]), min(rect.bottom, img.shape[0]),
                                    face_id))
-        # face_infos.append(cls(face_info.faceOrient[i],rect.left,
-        #        rect.top,rect.right,rect.bottom,face_id))
     return face_infos
 
 

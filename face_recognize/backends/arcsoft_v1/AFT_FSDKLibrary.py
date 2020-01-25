@@ -1,7 +1,7 @@
 import platform
 import os
 from ctypes import *
-from face_recognize.common import MRECT, ASVLOFFSCREEN
+from . import ASVLOFFSCREEN, MRECT
 
 class AFT_FSDK_FACERES(Structure):
     _fields_ = [('nFace',c_int32),('rcFace',POINTER(MRECT)),('lfaceOrient',c_int32)]

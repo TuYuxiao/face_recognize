@@ -3,10 +3,18 @@ from . import ASVL_COLOR_FORMAT
 from .AFT_FSDKLibrary import *
 from .AFR_FSDKLibrary import *
 from .AFD_FSDKLibrary import *
-from face_recognize.common import FaceInfo, ASVLOFFSCREEN, malloc, free
+from . import ASVLOFFSCREEN
+from face_recognize.common import FaceInfo, malloc, free
 from ctypes import *
-
 import platform
+
+
+THRESHOLD = 0.58
+TRACK_ACCELERATE = True
+TRACK_ID = False
+
+FaceFeature = AFR_FSDK_FACEMODEL
+
 
 APPID = c_char_p(b'AANTqgLuerZzjWdvtAJyx8p589erGMQX5x39C1urYbne')
 if platform.system() == 'Windows':
@@ -18,12 +26,6 @@ else:
     FT_SDKKEY = c_char_p(b'Co5UzVAgjkQD3skZwEQHxR66HePVNc4eCXAy7iUqoFNM')
     FR_SDKKEY = c_char_p(b'Co5UzVAgjkQD3skZwEQHxR6i6ehKZ9oFqweTLM4oGbfV')
 
-
-#DB_PATH = [os.getcwd() + "/db/face_1517122969.db"]
-#,os.getcwd()+ "/db/face_1524237086.db"]
-
-#threshold to judge if the two are the same person
-threshold = 0.58
 
 def getImg(frame):
     '''
@@ -68,17 +70,32 @@ def init_engine(mode='image',num_face=10,mask='all'):
         return None
     return engine
 
-def detect(engine, img, mode='image'):
+def detect(engine, img):
     inputImg = getImg(img)
     faceInfo = []
-    if mode == 'image':
-        pFaceRes = POINTER(AFD_FSDK_FACERES)()
-        ret = AFD_FSDK_StillImageFaceDetection(engine, byref(inputImg), byref(pFaceRes))
-    elif mode == 'video':
-        pFaceRes = POINTER(AFT_FSDK_FACERES)()
-        ret = AFT_FSDK_FaceFeatureDetect(engine, byref(inputImg), byref(pFaceRes))
-    else:
-        raise Exception('error')
+
+    pFaceRes = POINTER(AFD_FSDK_FACERES)()
+    ret = AFD_FSDK_StillImageFaceDetection(engine, byref(inputImg), byref(pFaceRes))
+
+    if ret != 0:
+        print('FSDK_FaceFeatureDetect 0x{0:x}'.format(ret))
+        return faceInfo
+
+    faceRes = pFaceRes.contents
+    if faceRes.nFace > 0:
+        for i in range(0, faceRes.nFace):
+            rect = faceRes.rcFace[i]
+            orient = faceRes.lfaceOrient.contents
+            faceInfo.append(FaceInfo(orient,rect.left,rect.top,rect.right,rect.bottom))
+    return faceInfo
+
+def track(engine, img):
+    inputImg = getImg(img)
+    faceInfo = []
+
+    pFaceRes = POINTER(AFT_FSDK_FACERES)()
+    ret = AFT_FSDK_FaceFeatureDetect(engine, byref(inputImg), byref(pFaceRes))
+
     if ret != 0:
         print('FSDK_FaceFeatureDetect 0x{0:x}'.format(ret))
         return faceInfo
@@ -88,8 +105,6 @@ def detect(engine, img, mode='image'):
         for i in range(0, faceRes.nFace):
             rect = faceRes.rcFace[i]
             orient = faceRes.lfaceOrient
-            if mode == 'image':
-                orient = orient.contents
             faceInfo.append(FaceInfo(orient,rect.left,rect.top,rect.right,rect.bottom))
     return faceInfo
 
