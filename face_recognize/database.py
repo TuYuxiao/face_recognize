@@ -1,14 +1,15 @@
-from abc import abstractmethod
-
 from sqlalchemy import create_engine
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm import sessionmaker
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKey
+import os
 
-
-eng = create_engine('sqlite:///face_feature.db')
+default_db_path = os.path.expanduser("~/.face_recognize")
+if not os.path.exists(default_db_path):
+    os.makedirs(default_db_path)
+eng = create_engine('sqlite:///'+os.path.join(default_db_path, "face_feature.db"))
 Session = sessionmaker(bind=eng)
 
 Base = declarative_base()
