@@ -66,7 +66,7 @@ class FaceDetector:
                         cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)
         return img
 
-    def track(self, img, tracker=None, recognizer=FaceRecognizer.default()):
+    def track(self, img, tracker=None, recognizer=None):
         img = trim(img)
         face_infos = self.backend.track(self.track_engine, img)
 
@@ -77,6 +77,9 @@ class FaceDetector:
 
         for info in face_infos:
             info.name = self.last_frame_infos.get(info.face_id)
+
+        if recognizer is None:
+            recognizer = FaceRecognizer.default()
 
         for info in face_infos:
             if info.name is None:
