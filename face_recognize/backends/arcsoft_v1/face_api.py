@@ -6,7 +6,7 @@ from .AFD_FSDKLibrary import *
 from . import ASVLOFFSCREEN
 from face_recognize.common import FaceInfo, malloc, free
 from ctypes import *
-import platform
+import sys
 
 
 THRESHOLD = 0.58
@@ -15,16 +15,35 @@ TRACK_ID = False
 
 FaceFeature = AFR_FSDK_FACEMODEL
 
-
-APPID = c_char_p(b'AANTqgLuerZzjWdvtAJyx8p589erGMQX5x39C1urYbne')
-if platform.system() == 'Windows':
-    FD_SDKKEY = c_char_p(b'Co5UzVAgjkQD3skZwEQHxR6DbADqDKFEWwuzGgDPFD61')
-    FT_SDKKEY = c_char_p(b'Co5UzVAgjkQD3skZwEQHxR66Rkxf7PtAHyhUSxtGUrqU')
-    FR_SDKKEY = c_char_p(b'Co5UzVAgjkQD3skZwEQHxR6iEmGYo6UrdMX7g7NbLmky')
+default_config_path = os.path.expanduser("~/.face_recognize/config")
+if not os.path.exists(default_config_path):
+    os.makedirs(default_config_path)
+config_file_path = os.path.join(default_config_path, "arcsoft_v1_config.py")
+if os.path.exists(config_file_path):
+    sys.path.append(default_config_path)
+    from arcsoft_v1_config import APPID, FD_SDKKEY, FT_SDKKEY, FR_SDKKEY
 else:
-    FD_SDKKEY = c_char_p(b'Co5UzVAgjkQD3skZwEQHxR6DT3ecFfD8MUG8as5a595U')
-    FT_SDKKEY = c_char_p(b'Co5UzVAgjkQD3skZwEQHxR66HePVNc4eCXAy7iUqoFNM')
-    FR_SDKKEY = c_char_p(b'Co5UzVAgjkQD3skZwEQHxR6i6ehKZ9oFqweTLM4oGbfV')
+    config_file_template = \
+"""
+import platform
+from ctypes import c_char_p
+APPID = c_char_p(b'')
+if platform.system() == 'Windows':
+    FD_SDKKEY = c_char_p(b'')
+    FT_SDKKEY = c_char_p(b'')
+    FR_SDKKEY = c_char_p(b'')
+else:
+    FD_SDKKEY = c_char_p(b'')
+    FT_SDKKEY = c_char_p(b'')
+    FR_SDKKEY = c_char_p(b'')
+"""
+    with open(config_file_path, 'w') as f:
+        f.write(config_file_template)
+
+    print("Please edit config file: %s and setup keys" % config_file_path)
+    exit()
+
+
 
 
 def getImg(frame):
@@ -63,11 +82,13 @@ def init_engine(mode='image',num_face=10,mask='all'):
                     workMem, c_int32(WORKBUF_SIZE),
                     byref(engine), AFT_FSDK_OPF_0_HIGHER_EXT, 16, num_face)
         else:
-            return None
+            assert False, "invalid engine mode"
+
     if ret != 0:
         free(workMem)
-        print('Initial %s engine fail: %s, %s'%(mode, mask, ret))
-        return None
+        print('Initial %s engine fail: %s, %s \nPlease check SDK keys'%(mode, mask, ret))
+        exit()
+
     return engine
 
 def detect(engine, img):

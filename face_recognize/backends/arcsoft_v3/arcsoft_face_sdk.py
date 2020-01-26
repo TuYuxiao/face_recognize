@@ -67,8 +67,6 @@ class ASF_ActiveFileInfo(Structure):
 
 
 default_lib_path = os.path.expanduser("~/.face_recognize/lib")
-if not os.path.exists(default_lib_path):
-    os.makedirs(default_lib_path)
 
 if platform.system() == 'Windows':
     face_dll_path = os.path.join(default_lib_path, 'libarcsoft_face.dll')
@@ -77,23 +75,14 @@ else:
     face_dll_path = os.path.join(default_lib_path, 'libarcsoft_face.so')
     face_engine_dll_path = os.path.join(default_lib_path, 'libarcsoft_face_engine.so')
 
-assert os.path.exists(face_dll_path) and os.path.exists(
-    face_engine_dll_path), "Please download %s, %s from Arcsoft face recognition platform and move them to " \
-                           "~/.face_recognize/lib " % (face_dll_path, face_engine_dll_path)
+if (not os.path.exists(face_dll_path)) or (not os.path.exists(
+    face_engine_dll_path)):
+    print("Please download %s, %s from Arcsoft face recognition platform and move them to " \
+                           "~/.face_recognize/lib " % (face_dll_path, face_engine_dll_path))
+    exit()
 
 face_dll = CDLL(face_dll_path)
 face_engine_dll = CDLL(face_engine_dll_path)
-
-if platform.system() == 'Windows':
-    face_dll = CDLL(os.path.join(os.path.dirname(
-        __file__), 'lib', 'libarcsoft_face.dll'))
-    face_engine_dll = CDLL(os.path.join(os.path.dirname(
-        __file__), 'lib', 'libarcsoft_face_engine.dll'))
-else:
-    face_dll = CDLL(os.path.join(os.path.dirname(
-        __file__), 'lib', 'libarcsoft_face.so'))
-    face_engine_dll = CDLL(os.path.join(os.path.dirname(
-        __file__), 'lib', 'libarcsoft_face_engine.so'))
 
 ASFGetActiveFileInfo = face_engine_dll.ASFGetActiveFileInfo
 ASFGetActiveFileInfo.restype = c_long

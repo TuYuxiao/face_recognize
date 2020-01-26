@@ -4,7 +4,7 @@ from .merror import MOK, MERR_ASF_ALREADY_ACTIVATED
 from face_recognize.common import FaceInfo
 from ctypes import *
 
-import platform
+import sys
 
 THRESHOLD = 0.8
 TRACK_ACCELERATE = True
@@ -12,11 +12,31 @@ TRACK_ID = True
 
 FaceFeature = ASF_FaceFeature
 
-APPID = b"AANTqgLuerZzjWdvtAJyx8p589erGMQX5x39C1urYbne"
-if platform.system() == 'Windows':
-    SDKKEY = b"Co5UzVAgjkQD3skZwEQHxRRjCXv1krzBBo3RxL3ha351"
+default_config_path = os.path.expanduser("~/.face_recognize/config")
+if not os.path.exists(default_config_path):
+    os.makedirs(default_config_path)
+config_file_path = os.path.join(default_config_path, "arcsoft_v3_config.py")
+if os.path.exists(config_file_path):
+    sys.path.append(default_config_path)
+    from arcsoft_v3_config import APPID, SDKKEY
 else:
-    SDKKEY = b"Co5UzVAgjkQD3skZwEQHxRRj4RLum5hcU5fDATRmSbpG"
+    config_file_template = \
+"""
+import platform
+from ctypes import c_char_p
+APPID = b""
+if platform.system() == 'Windows':
+    SDKKEY = b""
+else:
+    SDKKEY = b""
+"""
+    with open(config_file_path, 'w') as f:
+        f.write(config_file_template)
+
+    print("Please edit config file: %s and setup keys" % config_file_path)
+    exit()
+
+
 
 MASK = {'all': (
         ASF_FACE_DETECT | ASF_FACERECOGNITION | ASF_AGE | ASF_GENDER | ASF_FACE3DANGLE | ASF_LIVENESS | ASF_IR_LIVENESS),
@@ -42,12 +62,13 @@ def init_engine(mode='image', num_face=10, mask='all'):
     mode = ASF_DETECT_MODE_IMAGE if mode == 'image' else ASF_DETECT_MODE_VIDEO
     mask = MASK[mask]
     res = ASFInitEngine(mode, priority, n_scale, num_face, mask, byref(handle))
+
     if res != MOK:
-        print("ALInitEngine fail: %d" % res)
-        return None
-    else:
-        print("ALInitEngine sucess: %d" % res)
-        return handle
+        print("ALInitEngine fail: %d \nPlease check SDK keys" % res)
+        exit()
+
+    print("ALInitEngine sucess: %d" % res)
+    return handle
 
 
 def detect(engine, img):

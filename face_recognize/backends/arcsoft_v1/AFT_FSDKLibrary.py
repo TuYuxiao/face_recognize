@@ -21,12 +21,19 @@ AFT_FSDK_FOC_90 = 0x2;  # 90 degree
 AFT_FSDK_FOC_270 = 0x3; # 270 degree
 AFT_FSDK_FOC_180 = 0x4; # 180 degree
 
+
+default_lib_path = os.path.expanduser("~/.face_recognize/lib")
+
 if platform.system() == 'Windows':
-    internalLibrary = CDLL(os.path.join(os.path.dirname(
-        __file__), 'lib', 'libarcsoft_fsdk_face_tracking.dll'))
+    internalLibraryPath = os.path.join(default_lib_path, 'libarcsoft_fsdk_face_tracking.dll')
 else:
-    internalLibrary = CDLL(os.path.join(os.path.dirname(
-        __file__), 'lib', 'libarcsoft_fsdk_face_tracking.so'))
+    internalLibraryPath = os.path.join(default_lib_path, 'libarcsoft_fsdk_face_tracking.so')
+
+if not os.path.exists(internalLibraryPath):
+    print("Please download %s from Arcsoft face recognition platform and move them to ~/.face_recognize/lib " % (
+        os.path.basename(internalLibraryPath)))
+
+internalLibrary = CDLL(internalLibraryPath)
 
 AFT_FSDK_InitialFaceEngine = internalLibrary.AFT_FSDK_InitialFaceEngine
 AFT_FSDK_UninitialFaceEngine = internalLibrary.AFT_FSDK_UninitialFaceEngine
