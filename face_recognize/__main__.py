@@ -4,7 +4,7 @@ import cv2
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", metavar="<command>", help="'recognize' or 'register'")
+    parser.add_argument("command", metavar="<command>", help="'recognize' or 'register' or 'init'")
     parser.add_argument('--version', default="arcsoft_v3", choices=["arcsoft_v1", "arcsoft_v3", "dlib"],
                         metavar="recognizer version", help='Recognizer Version')
     parser.add_argument('--name', metavar="user name", help='user name')
@@ -61,6 +61,52 @@ if __name__ == '__main__':
             recognizer.register_feature([args.image], names=[args.name], detector=detector)
         else:
             recognizer.register_feature([args.image], detector=detector)
+
+    elif args.command == 'init':
+        import os
+        default_lib_path = os.path.expanduser("~/.face_recognize/config")
+        if not os.path.exists(default_lib_path):
+            os.makedirs(default_lib_path)
+
+        default_config_path = os.path.expanduser("~/.face_recognize/config")
+        if not os.path.exists(default_config_path):
+            os.makedirs(default_config_path)
+
+        arcsoft_v3_config_file_path = os.path.join(default_config_path, "arcsoft_v3_config.py")
+        if not os.path.exists(arcsoft_v3_config_file_path):
+            config_file_template = \
+"""
+import platform
+from ctypes import c_char_p
+APPID = b""
+if platform.system() == 'Windows':
+    SDKKEY = b""
+else:
+    SDKKEY = b""
+"""
+            with open(arcsoft_v3_config_file_path, 'w') as f:
+                f.write(config_file_template)
+            print("Config file generated: %s, please modify APPID and KEY" % arcsoft_v3_config_file_path)
+
+        arcsoft_v1_config_file_path = os.path.join(default_config_path, "arcsoft_v1_config.py")
+        if not os.path.exists(arcsoft_v1_config_file_path):
+            config_file_template = \
+"""
+import platform
+from ctypes import c_char_p
+APPID = c_char_p(b'')
+if platform.system() == 'Windows':
+    FD_SDKKEY = c_char_p(b'')
+    FT_SDKKEY = c_char_p(b'')
+    FR_SDKKEY = c_char_p(b'')
+else:
+    FD_SDKKEY = c_char_p(b'')
+    FT_SDKKEY = c_char_p(b'')
+    FR_SDKKEY = c_char_p(b'')
+"""
+            with open(arcsoft_v1_config_file_path, 'w') as f:
+                f.write(config_file_template)
+            print("Config file generated: %s, please modify APPID and KEY" % arcsoft_v1_config_file_path)
 
     else:
         print("Invalid command!!!")
