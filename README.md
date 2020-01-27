@@ -69,7 +69,46 @@ infos = detector.detect(img)
 feature = recognizer.extract(img, infos[0])
 ```
 
-#### Recognize People in Usb Camera
+#### Face Feature Compare
+```
+from face_recognize import FaceDetector, FaceRecognizer
+import cv2
+img1 = cv2.imread('me.jpg')
+img2 = cv2.imread('unknown.jpg')
+detector = FaceDetector()
+recognizer = FaceRecognizer()
+infos1 = detector.detect(img1)
+infos2 = detector.detect(img2)
+feature1 = recognizer.extract(img1, infos1[0])
+feature2 = recognizer.extract(img2, infos2[0])
+
+if recognizer.judge(feature1, feature2):
+    print("This is me")
+else:
+    print("This is not me")
+```
+
+#### Face Recognition (without db)
+```
+from face_recognize import FaceDetector, FaceRecognizer
+import cv2
+
+detector = FaceDetector()
+recognizer = FaceRecognizer()
+recognizer.register_feature(['me.jpg'], name=['me'], to_db=False, to_buffer=True, detector=detector)
+
+img = cv2.imread('unknown.jpg')
+infos = detector.detect(img)
+feature = recognizer.extract(img, infos[0])
+name = recognizer.recognize(feature)
+if name:
+    print("This is %s" % name)
+else:
+    print("Unknown")
+```
+
+
+#### Recognize People in Usb Camera (with db)
 ```
 from face_recognize import FaceDetector
 from cv2_utils import VideoCapture
