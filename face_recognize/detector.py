@@ -59,11 +59,12 @@ class FaceDetector:
         img = cv2.imdecode(img, cv2.IMREAD_COLOR)
         return self.detect(img)
 
-    def drawInfos(self, img, infos):
+    def drawInfos(self, img, infos, show_name = True):
         for info in infos:
             cv2.rectangle(img, (info.left, info.top), (info.right, info.bottom), (0, 0, 255), 2)
-            cv2.putText(img, info.name if info.name else "unknown", (info.left + 5, info.top + 25),
-                        cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)
+            if show_name:
+                cv2.putText(img, info.name if info.name else "unknown", (info.left + 5, info.top + 25),
+                            cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)
         return img
 
     def track(self, img, tracker=None, recognizer=None):

@@ -1,7 +1,7 @@
 from . import FaceDetector, FaceRecognizer
 import cv2
 
-if __name__ == '__main__':
+def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("command", metavar="<command>", help="'recognize' or 'register' or 'init'")
@@ -11,9 +11,9 @@ if __name__ == '__main__':
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--image', metavar="path to image",
-                        help='Image to recognize or register')
+                       help='Image to recognize or register')
     group.add_argument('--video', metavar="path to image",
-                        help='Video to recognize')
+                       help='Video to recognize')
 
     args = parser.parse_args()
 
@@ -75,15 +75,15 @@ if __name__ == '__main__':
         arcsoft_v3_config_file_path = os.path.join(default_config_path, "arcsoft_v3_config.py")
         if not os.path.exists(arcsoft_v3_config_file_path):
             config_file_template = \
-"""
-import platform
-from ctypes import c_char_p
-APPID = b""
-if platform.system() == 'Windows':
-    SDKKEY = b""
-else:
-    SDKKEY = b""
-"""
+                """
+                import platform
+                from ctypes import c_char_p
+                APPID = b""
+                if platform.system() == 'Windows':
+                    SDKKEY = b""
+                else:
+                    SDKKEY = b""
+                """
             with open(arcsoft_v3_config_file_path, 'w') as f:
                 f.write(config_file_template)
             print("Config file generated: %s, please modify APPID and KEY" % arcsoft_v3_config_file_path)
@@ -91,22 +91,26 @@ else:
         arcsoft_v1_config_file_path = os.path.join(default_config_path, "arcsoft_v1_config.py")
         if not os.path.exists(arcsoft_v1_config_file_path):
             config_file_template = \
-"""
-import platform
-from ctypes import c_char_p
-APPID = c_char_p(b'')
-if platform.system() == 'Windows':
-    FD_SDKKEY = c_char_p(b'')
-    FT_SDKKEY = c_char_p(b'')
-    FR_SDKKEY = c_char_p(b'')
-else:
-    FD_SDKKEY = c_char_p(b'')
-    FT_SDKKEY = c_char_p(b'')
-    FR_SDKKEY = c_char_p(b'')
-"""
+                """
+                import platform
+                from ctypes import c_char_p
+                APPID = c_char_p(b'')
+                if platform.system() == 'Windows':
+                    FD_SDKKEY = c_char_p(b'')
+                    FT_SDKKEY = c_char_p(b'')
+                    FR_SDKKEY = c_char_p(b'')
+                else:
+                    FD_SDKKEY = c_char_p(b'')
+                    FT_SDKKEY = c_char_p(b'')
+                    FR_SDKKEY = c_char_p(b'')
+                """
             with open(arcsoft_v1_config_file_path, 'w') as f:
                 f.write(config_file_template)
             print("Config file generated: %s, please modify APPID and KEY" % arcsoft_v1_config_file_path)
 
     else:
         print("Invalid command!!!")
+
+
+if __name__ == '__main__':
+    main()

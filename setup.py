@@ -13,4 +13,9 @@ setup(
     platforms = 'any',
     install_requires = ['opencv-python'],
     keywords = ['face recognize'],
+    entry_points={
+        'console_scripts': [
+            'face_recognize=face_recognize.__main__:main'
+        ]
+    }
 )
