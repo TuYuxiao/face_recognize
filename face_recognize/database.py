@@ -33,6 +33,20 @@ class UserFeature(Base):
 Base.metadata.create_all(eng)
 
 
+def delete_user(name):
+    sess = Session()
+    user = sess.query(User).filter(User.name == name).first()
+    if user is None:
+        print("User %s doesn't exists" % name)
+        return
+    sess.query(UserFeature).filter(UserFeature.id == user.id).delete()
+    try:
+        sess.commit()
+    except InvalidRequestError as e:
+        print(e)
+        sess.rollback()
+
+
 def save_feature(names, features, version, new_user=True):
     sess = Session()
 

@@ -52,15 +52,25 @@ def main():
                 cv2.imshow('face recognize', img)
 
     elif args.command == 'register':
+        import os
         assert args.image is not None
-        img = cv2.imread(args.image)
-        assert img is not None, "Fail to open image"
         detector = FaceDetector(version=args.version)
         recognizer = FaceRecognizer(version=args.version)
-        if args.name:
-            recognizer.register_feature([args.image], names=[args.name], detector=detector)
+
+        if os.path.isdir(args.image):
+            import glob
+            images = glob.glob(os.path.join(args.image, "*[.jpg,.jpeg,.png,.bmp,.JPG,.JPEG,.PNG,.BMP]"))
+            recognizer.register_feature(images, detector=detector)
         else:
-            recognizer.register_feature([args.image], detector=detector)
+            if args.name:
+                recognizer.register_feature([args.image], names=[args.name], detector=detector)
+            else:
+                recognizer.register_feature([args.image], detector=detector)
+
+    elif args.command == 'delete':
+        assert args.name is not None
+        from .database import delete_user
+        delete_user(args.name)
 
     elif args.command == 'init':
         import os
