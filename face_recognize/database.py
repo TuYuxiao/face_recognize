@@ -40,6 +40,7 @@ def delete_user(name):
         print("User %s doesn't exists" % name)
         return
     sess.query(UserFeature).filter(UserFeature.id == user.id).delete()
+    sess.delete(user)
     try:
         sess.commit()
     except InvalidRequestError as e:
