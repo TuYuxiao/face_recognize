@@ -39,6 +39,10 @@ to $HOME/.face_recognize/lib.
 `face_recognize recognize --video path-to-video`  
 #### Recognize people in usb camera
 `face_recognize recognize --video 0`  
+#### Delete User Feature in Database
+`face_recognzie delete --name user-name`
+#### Delete All Features in Database
+`face_recognzie clear`
 
 The backend is default to be arcsoft_v3, use `--verion backend-verson` to indicate the backend.
 

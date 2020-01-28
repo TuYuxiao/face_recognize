@@ -9,7 +9,7 @@ import os
 default_db_path = os.path.expanduser("~/.face_recognize")
 if not os.path.exists(default_db_path):
     os.makedirs(default_db_path)
-eng = create_engine('sqlite:///'+os.path.join(default_db_path, "face_feature.db"))
+eng = create_engine('sqlite:///' + os.path.join(default_db_path, "face_feature.db"))
 Session = sessionmaker(bind=eng)
 
 Base = declarative_base()
@@ -30,7 +30,12 @@ class UserFeature(Base):
     feature_version = Column(Integer, nullable=False)
 
 
-Base.metadata.create_all(eng)
+def create_all():
+    Base.metadata.create_all(eng)
+
+
+def drop_all():
+    Base.metadata.drop_all(eng)
 
 
 def delete_user(name):
@@ -82,3 +87,6 @@ def save_feature(names, features, version, new_user=True):
             sess.rollback()
 
     sess.close()
+
+
+create_all()

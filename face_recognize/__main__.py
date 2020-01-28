@@ -4,7 +4,7 @@ import cv2
 def main():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", metavar="<command>", help="'recognize' or 'register' or 'init'")
+    parser.add_argument("command", metavar="<command>", help="'recognize' or 'register' or 'delete' or 'clear' or 'init'")
     parser.add_argument('--version', default="arcsoft_v3", choices=["arcsoft_v1", "arcsoft_v3", "dlib"],
                         metavar="recognizer version", help='Recognizer Version')
     parser.add_argument('--name', metavar="user name", help='user name')
@@ -71,6 +71,10 @@ def main():
         assert args.name is not None
         from .database import delete_user
         delete_user(args.name)
+
+    elif args.command == 'clear':
+        from .database import drop_all
+        drop_all()
 
     elif args.command == 'init':
         import os
