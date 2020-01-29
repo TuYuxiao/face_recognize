@@ -116,11 +116,13 @@ else:
 ```
 from face_recognize import FaceDetector
 from cv2_utils import VideoCapture
+import cv2
 
-detector = FaceDetector()
+detector = FaceDetector("arcsoft_v3")
 
-cap = VideoCapture(0, show_video=True, show_fps=True)
+cap = VideoCapture(0, show_video=False)
 for img in cap:
     face_infos = detector.track(img)
-    detector.drawInfos(img, face_infos)
+    img = detector.drawInfos(img, face_infos)
+    cv2.imshow('img', img)
 ```
