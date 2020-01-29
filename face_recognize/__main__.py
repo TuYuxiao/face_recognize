@@ -1,10 +1,13 @@
 from . import FaceDetector, FaceRecognizer
 import cv2
+import numpy as np
+
 
 def main():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", metavar="<command>", help="'recognize' or 'register' or 'delete' or 'clear' or 'init'")
+    parser.add_argument("command", metavar="<command>",
+                        help="'recognize' or 'register' or 'delete' or 'clear' or 'init'")
     parser.add_argument('--version', default="arcsoft_v3", choices=["arcsoft_v1", "arcsoft_v3", "dlib"],
                         metavar="recognizer version", help='Recognizer Version')
     parser.add_argument('--name', metavar="user name", help='user name')
@@ -23,18 +26,21 @@ def main():
         detector = FaceDetector(version=args.version)
 
         if args.image:
-            img = cv2.imread(args.image)
+            img = cv2.imdecode(np.fromfile(args.image, dtype=np.uint8), cv2.IMREAD_COLOR)
             assert img is not None, "Fail to open image"
             infos = detector.detect(img)
             infos.sort(key=lambda x: (x.left + x.right) / 2)
 
-            names = []
             for info in infos:
                 feature = recognizer.extract(img, info)
-                name = recognizer.recognize(feature)
-                names.append(name if name else "unknown")
+                info.name = recognizer.recognize(feature)
 
-            print("People names in image (from left to right): ", ', '.join(names))
+            print("People names in image (from left to right): ",
+                  ', '.join([info.name if info.name else "unknown" for info in infos]))
+            img = detector.drawInfos(img, infos)
+            cv2.imshow(args.image, img)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
         else:
             video = args.video
             try:

@@ -11,7 +11,7 @@ setup(
     packages = find_packages(),
     include_package_data = True,
     platforms = 'any',
-    install_requires = ['opencv-python'],
+    install_requires = ['opencv-python', 'numpy'],
     keywords = ['face recognize'],
     entry_points={
         'console_scripts': [

@@ -51,6 +51,13 @@ class FaceDetector:
         face_infos = self.backend.detect(self.detect_engine, img)
         return face_infos
 
+    def extract(self, img, recognizer=None):
+        img = trim(img)
+        face_infos = self.backend.detect(self.detect_engine, img)
+        if recognizer is None:
+            recognizer = FaceRecognizer.default()
+        return [recognizer.extract(img, info) for info in face_infos]
+
     def detectFromPath(self, path):
         img = cv2.imread(path)
         return self.detect(img)
@@ -60,12 +67,16 @@ class FaceDetector:
         return self.detect(img)
 
     def drawInfos(self, img, infos, show_name = True):
+        from PIL import Image, ImageDraw, ImageFont
+        import numpy as np
+        img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        draw = ImageDraw.Draw(img)
+        fontText = ImageFont.truetype("font/simsun.ttc", 25, encoding="utf-8")
         for info in infos:
-            cv2.rectangle(img, (info.left, info.top), (info.right, info.bottom), (0, 0, 255), 2)
+            draw.rectangle([(info.left, info.top), (info.right, info.bottom)], outline='red')
             if show_name:
-                cv2.putText(img, info.name if info.name else "unknown", (info.left + 5, info.top + 25),
-                            cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2)
-        return img
+                draw.text((info.left + 5, info.top + 5), info.name if info.name else "unknown", (255, 0, 0), font=fontText)
+        return cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
 
     def track(self, img, tracker=None, recognizer=None):
         img = trim(img)
@@ -87,6 +98,7 @@ class FaceDetector:
                 feature = recognizer.extract(img, info)
                 if feature is not None:
                     info.name = recognizer.recognize(feature)
+                # TODO async recognize
 
         self.last_frame_infos = {info.face_id:info.name for info in face_infos if info.face_id is not None}
 

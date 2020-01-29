@@ -47,7 +47,7 @@ class FaceRecognizer:
 
         for name, img in zip(names, images):
             if isinstance(img, str):
-                img = cv2.imread(img)
+                img = cv2.imdecode(np.fromfile(img, dtype=np.uint8), cv2.IMREAD_COLOR)
             if not isinstance(img, np.ndarray):
                 print("Invalid image for user %s" % name)
                 continue
