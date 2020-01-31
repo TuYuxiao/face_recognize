@@ -56,7 +56,12 @@ class FaceDetector:
         face_infos = self.backend.detect(self.detect_engine, img)
         if recognizer is None:
             recognizer = FaceRecognizer.default()
-        return [recognizer.extract(img, info) for info in face_infos]
+        features = []
+        for info in face_infos:
+            feature = recognizer.extract(img, info)
+            if feature:
+                features.append(feature)
+        return features
 
     def detectFromPath(self, path):
         img = cv2.imread(path)

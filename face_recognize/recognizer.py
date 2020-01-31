@@ -35,7 +35,7 @@ class FaceRecognizer:
             self._add_feature(u.name, self.backend.FaceFeature.fromByteArray(f.user_feature))
         sess.close()
 
-    def register_feature(self, images, *, names=None, to_db=True, to_buffer=False, detector=None):
+    def register_feature(self, images, names=None, *, to_db=True, to_buffer=False, detector=None):
         """
         if names is None, images should be paths of images.
         """
@@ -109,7 +109,7 @@ class FaceRecognizer:
     def judge(self, feature1, feature2):
         return self.compare(feature1, feature2) > self.THRESHOLD
 
-    def recognize(self, feature, early_stop=True):
+    def recognize(self, feature, early_stop=False):
         max_score, max_name = 0., None
         for name, user_features in self.features.items():
             score = max(self.compare(feature, f) for f in user_features)
@@ -118,6 +118,7 @@ class FaceRecognizer:
                 max_name = name
                 if early_stop and max_score > self.THRESHOLD:
                     break
+        print("Recognize Result:", max_score, max_name)
         if max_score < self.THRESHOLD:
             return
         return max_name

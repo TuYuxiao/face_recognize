@@ -79,8 +79,9 @@ def main():
         delete_user(args.name)
 
     elif args.command == 'clear':
-        from .database import drop_all
+        from .database import drop_all, create_all
         drop_all()
+        create_all()
 
     elif args.command == 'init':
         import os
