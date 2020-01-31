@@ -39,6 +39,7 @@ def main():
                   ', '.join([info.name if info.name else "unknown" for info in infos]))
             img = detector.drawInfos(img, infos)
             cv2.imshow(args.image, img)
+            # TODO resize image if image is too large
             cv2.waitKey(0)
             cv2.destroyAllWindows()
         else:
