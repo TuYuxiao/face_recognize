@@ -74,13 +74,17 @@ class FaceDetector:
     def drawInfos(self, img, infos, show_name = True):
         from PIL import Image, ImageDraw, ImageFont
         import numpy as np
+        import platform
         img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
         draw = ImageDraw.Draw(img)
-        fontText = ImageFont.truetype("font/simsun.ttc", 25, encoding="utf-8")
+        if platform.system() == 'Windows':
+            font = ImageFont.truetype("font/simsun.ttc", 25, encoding="utf-8")
+        else:
+            font = ImageFont.truetype("font/NotoSansCJK-Regular.ttc", 25, encoding="utf-8")
         for info in infos:
             draw.rectangle([(info.left, info.top), (info.right, info.bottom)], outline='red')
             if show_name:
-                draw.text((info.left + 5, info.top + 5), info.name if info.name else "unknown", (255, 0, 0), font=fontText)
+                draw.text((info.left + 5, info.top + 5), info.name if info.name else "unknown", (255, 0, 0), font=font)
         return cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
 
     def track(self, img, tracker=None, recognizer=None):
